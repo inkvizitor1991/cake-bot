@@ -40,4 +40,7 @@ python3 manage.py migrate
 ```
 python3 manage.py runserver
 ```
-
+5. Запустить телеграм бот:
+```
+python3 manage.py bot
+```
