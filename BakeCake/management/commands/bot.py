@@ -3,7 +3,6 @@ import time
 import telegram
 import re
 
-
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from telegram import Bot
@@ -19,9 +18,10 @@ from BakeCake.models import Profile
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler)
-#from order import get_order_text check_date_time
+# from order import get_order_text check_date_time
 from BakeCake.management.commands.order import get_order_text, test_phone
-from BakeCake.management.commands.check_date_time import check_time, check_date, get_datetime
+from BakeCake.management.commands.check_date_time import check_time, \
+    check_date, get_datetime
 from BakeCake.management.commands.get_price import get_price
 from BakeCake.management.commands.get_address import get_adress
 
@@ -41,12 +41,13 @@ menu_keyboard = [['Собрать торт'],
                  ]
 
 back_buttons = ['Пропустить', 'Назад', 'Вернулся в меню']
-menu_markup = ReplyKeyboardMarkup(menu_keyboard, resize_keyboard=True, one_time_keyboard=True)
+menu_markup = ReplyKeyboardMarkup(menu_keyboard, resize_keyboard=True,
+                                  one_time_keyboard=True)
 
 
 def chunks_generators(buttons, chunks_number):
-    for i in range(0, len(buttons), chunks_number):
-        yield buttons[i: i + chunks_number]
+    for button in range(0, len(buttons), chunks_number):
+        yield buttons[button: button + chunks_number]
 
 
 def keyboard_maker(buttons, number):
@@ -77,9 +78,12 @@ def start(update, context):
         personal_data_markup = keyboard_maker(buttons, 2)
         time.sleep(0.5)
         name = 'approval.pdf'
-        bot.send_document(chat_id=chat_id, document=open(f'BakeCake/management/commands/{name}', 'rb'))
-        update.message.reply_text('Ваше согласие на обработку персональных данных',
-                                  reply_markup=personal_data_markup)
+        bot.send_document(chat_id=chat_id,
+                          document=open(f'BakeCake/management/commands/{name}',
+                                        'rb'))
+        update.message.reply_text(
+            'Ваше согласие на обработку персональных данных',
+            reply_markup=personal_data_markup)
         return PERSONAL_DATA
 
 
@@ -91,7 +95,8 @@ def personal_data(update, context):
                                         request_contact=True)
         my_keyboard = ReplyKeyboardMarkup(
             [[contact_button]], resize_keyboard=True)
-        update.message.reply_text('Ваш контактный телефон', reply_markup=my_keyboard)
+        update.message.reply_text('Ваш контактный телефон',
+                                  reply_markup=my_keyboard)
         return PHONE
     elif user_message == 'Не согласен':
         buttons = ['Согласен', 'Не согласен']
@@ -103,9 +108,7 @@ def personal_data(update, context):
 
 
 def phone(update, context):
-    print(update.message.contact)
     context.user_data['phone'] = update.message.contact['phone_number']
-    print(update.message.contact['phone_number'])
     update.message.reply_text(
         f'{update.message.chat.first_name}, ваши контактные данные сохранены!')
     update.message.reply_text('Введите свой адрес',
@@ -129,11 +132,13 @@ def menu(update, context):
     chat_id = update.message.chat_id
     user_message = update.message.text
     if user_message == 'Собрать торт':
-        buttons = ['Один уровень', 'Два уровня', 'Три уровня', 'Вернулся в меню']
+        buttons = ['Один уровень', 'Два уровня', 'Три уровня',
+                   'Вернулся в меню']
         context.user_data['level_buttons'] = buttons
         levels_markup = keyboard_maker(buttons, 3)
         time.sleep(0.5)
-        update.message.reply_text('Количество уровней', reply_markup=levels_markup)
+        update.message.reply_text('Количество уровней',
+                                  reply_markup=levels_markup)
         return LEVELS
     elif user_message == 'Мои заказы':
         check_user = Profile.objects.filter(external_id=chat_id).exists()
@@ -146,10 +151,11 @@ def menu(update, context):
                 buttons.append('Следующий заказ')
             created_orders_markup = keyboard_maker(buttons, 2)
             update.message.reply_text(f'{all_orders[0]}',
-                                     reply_markup=created_orders_markup)
+                                      reply_markup=created_orders_markup)
             return CREATED_ORDER
         else:
-            update.message.reply_text('У вас заказов нет', reply_markup=menu_markup)
+            update.message.reply_text('У вас заказов нет',
+                                      reply_markup=menu_markup)
             return MENU
     else:
         update.message.reply_text('Следующий заказ',
@@ -169,7 +175,6 @@ def created_orders(update, context):
         return MENU
 
 
-
 def levels(update, context):
     user_message = update.message.text
     if user_message == 'Вернулся в меню':
@@ -177,15 +182,15 @@ def levels(update, context):
         return MENU
     if user_message in context.user_data.get('level_buttons')[:-1]:
         context.user_data['total_levels'] = user_message
-        buttons = ['Квадрат', 'Круг', 'Прямоугольник', 'Назад', 'Вернулся в меню']
+        buttons = ['Квадрат', 'Круг', 'Прямоугольник', 'Назад',
+                   'Вернулся в меню']
         context.user_data['form_buttons'] = buttons
         levels_markup = keyboard_maker(buttons, 2)
         time.sleep(0.5)
         update.message.reply_text('Форма',
                                   reply_markup=levels_markup)
         return FORM
-    else:
-        pass
+
 
 def form(update, context):
     user_message = update.message.text
@@ -210,12 +215,9 @@ def form(update, context):
         update.message.reply_text('Топпинг',
                                   reply_markup=topping_markup)
         return TOPPING
-    else:
-        pass
 
 
 def topping(update, context):
-    print(context.user_data.get('bc_form'))
     user_message = update.message.text
     if user_message == 'Вернулся в меню':
         update.message.reply_text('Меню', reply_markup=menu_markup)
@@ -264,8 +266,6 @@ def berries(update, context):
         update.message.reply_text('Декор',
                                   reply_markup=decor_markup)
         return DECOR
-    else:
-        pass
 
 
 def decor(update, context):
@@ -288,8 +288,9 @@ def decor(update, context):
         time.sleep(0.5)
         update.message.reply_text('Надпись')
         time.sleep(0.5)
-        update.message.reply_text('Мы можем разместить на торте любую надпись, например: «С днем рождения!»',
-                                  reply_markup=decor_markup)
+        update.message.reply_text(
+            'Мы можем разместить на торте любую надпись, например: «С днем рождения!»',
+            reply_markup=decor_markup)
         return INSCRIPTION
     else:
         pass
@@ -314,7 +315,8 @@ def inscription(update, context):
             context.user_data['price'] = 0
         comment_markup = keyboard_maker(back_buttons, 2)
         time.sleep(0.5)
-        update.message.reply_text('Комментарий к заказу', reply_markup=comment_markup)
+        update.message.reply_text('Комментарий к заказу',
+                                  reply_markup=comment_markup)
         return COMMENT
 
 
@@ -325,10 +327,10 @@ def comment(update, context):
         update.message.reply_text('Меню', reply_markup=menu_markup)
         return MENU
     elif user_message == 'Назад':
-
         time.sleep(0.5)
-        update.message.reply_text('Мы можем разместить на торте любую надпись, например: «С днем рождения!»',
-                                  reply_markup=inscription_markup)
+        update.message.reply_text(
+            'Мы можем разместить на торте любую надпись, например: «С днем рождения!»',
+            reply_markup=inscription_markup)
         return INSCRIPTION
     else:
         context.user_data['bc_comment'] = user_message
@@ -358,9 +360,9 @@ def promo(update, context):
         return ADDRESS
     else:
         promo_markup = keyboard_maker(back_buttons, 2)
-        update.message.reply_text('Введите правильный промокод', reply_markup=promo_markup)
+        update.message.reply_text('Введите правильный промокод',
+                                  reply_markup=promo_markup)
         return PROMO
-
 
 
 def address(update, context):
@@ -418,10 +420,10 @@ def delivery_date(update, context):
             buttons = ['Назад', 'Вернулся в меню']
             address_markup = keyboard_maker(buttons, 2)
             time.sleep(0.5)
-            update.message.reply_text('Введите дату доставки(пример: 2021-10-27)',
-                                      reply_markup=address_markup)
+            update.message.reply_text(
+                'Введите дату доставки(пример: 2021-10-27)',
+                reply_markup=address_markup)
             return DELIVERY_DATE
-
 
 
 def delivery_time(update, context):
@@ -496,9 +498,9 @@ def order(update, context):
         return DELIVERY_TIME
     elif user_message == 'Заказать торт':
         time.sleep(0.5)
-        update.message.reply_text('Ваш заказ успешно принят', reply_markup=menu_markup)
+        update.message.reply_text('Ваш заказ успешно принят',
+                                  reply_markup=menu_markup)
         chat_id = update.message.chat_id
-        user_id = context.user_data.get('user_id')
         first_name = context.user_data.get('first_name')
         last_name = context.user_data.get('last_name')
         username = context.user_data.get('username')
@@ -555,6 +557,7 @@ def cancel(update, _):
         'Мое дело предложить - Ваше отказаться'
     )
     return ConversationHandler.END
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -616,7 +619,7 @@ class Command(BaseCommand):
                         MessageHandler(Filters.text, promo)],
 
                 CREATED_ORDER: [CommandHandler('start', start),
-                        MessageHandler(Filters.text, created_orders)],
+                                MessageHandler(Filters.text, created_orders)],
 
             },
 
@@ -627,5 +630,3 @@ class Command(BaseCommand):
 
         updater.start_polling()
         updater.idle()
-
-

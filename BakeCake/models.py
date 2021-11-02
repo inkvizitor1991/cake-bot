@@ -55,7 +55,7 @@ class Order(models.Model):
     order_status = models.BooleanField(
         'Статус заказа',
         choices=CHOICES,
-        null=True)
+        null=True, blank=True,)
     number_levels = models.CharField(
         'Количество уровней', blank=True,
         max_length=20

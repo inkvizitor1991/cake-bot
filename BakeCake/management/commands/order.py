@@ -1,5 +1,6 @@
 import re
 import phonenumbers
+
 price = {'Один уровень': 'Один уровень (+400р)',
          'Два уровня': 'Два уровня (+750р)',
          'Три уровня': 'Три уровня (+1100р)', 'Квадрат': 'Квадрат (+600)',
@@ -17,6 +18,7 @@ price = {'Один уровень': 'Один уровень (+400р)',
          'Фисташки': 'Фисташки (+300)', 'Безе': 'Безе (+400)',
          'Фундук': 'Фундук (+350)', 'Пекан': 'Пекан (+300)', }
 
+
 def get_order_parser(order_text, promo_code, bc_speed):
     price = re.findall(r'\d+', order_text)
     int_price = []
@@ -28,7 +30,7 @@ def get_order_parser(order_text, promo_code, bc_speed):
     else:
         promo_code = 0
     if bc_speed:
-        speed = f'''\n+20% за скорость {int((order_price - promo_code) * 1.2)}p.'''
+        speed = f'\n+20% за скорость {int((order_price - promo_code) * 1.2)}p.'
     else:
         speed = ''
     total_price = f'''
@@ -36,6 +38,7 @@ def get_order_parser(order_text, promo_code, bc_speed):
     Цена заказа: {order_price - promo_code}p.{speed}
     '''
     return total_price
+
 
 def get_order_text(new_order):
     total_levels, bc_form, bc_topping, bc_berries, bc_decor, bc_inscription, bc_comment, bc_address, bc_delivery_date, bc_delivery_time, promo_code, bc_speed = new_order
@@ -61,7 +64,6 @@ def get_order_text(new_order):
     {bc_inscription}
     '''
     order_price = get_order_parser(order_text, promo_code, bc_speed)
-    print(order_price)
     delivery = f'''
     Доставка:
     Адрес:
@@ -77,7 +79,6 @@ def get_order_text(new_order):
 
 
 def test_phone(phonenumber):
-    #phonenumber = '89899704082'
     number = phonenumbers.parse(phonenumber, 'RU')
     if phonenumbers.is_valid_number(number):
         phone = phonenumbers.format_number(
@@ -86,4 +87,4 @@ def test_phone(phonenumber):
         )
         return phone
     else:
-        return False #print('Укажите номер правильно!')
+        return False

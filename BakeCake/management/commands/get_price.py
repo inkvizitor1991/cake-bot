@@ -72,29 +72,5 @@ def show_order(price,chat_id):
 {order_number.topping} (+{price[order_number.topping]}р.){berries}{decor}{title}
 '''
         all_orders.append(single_order)
-        # print(order)
-        # order_number = Order.objects.get(pk=order.pk)
-        # if order_number.order_status == None:
-        #     print('Статус заказа: готовим ваш торт')
-        # if order_number.order_status == False:
-        #     print('Статус заказа: торт в пути')
-        # if order_number.order_status == True:
-        #     print('Статус заказа: торт у вас')
-        # print('Количество уровней:')
-        # print(f'{order_number.number_levels} (+{price[order_number.number_levels]})р')
-        # print('Форма:')
-        # print(f'{order_number.form} (+{price[order_number.form]})р')
-        # print(f'Топпинг:')
-        # print(f'{order_number.topping} (+{price[order_number.topping]})р')
-        # if not order_number.berries == 'Не выбрано':
-        #     print('Ягоды:')
-        #     print(f'{order_number.berries} (+{price[order_number.berries]})р')
-        # if not order_number.decor == 'Не выбрано':
-        #     print('Декор:')
-        #     print(f'{order_number.decor} (+{price[order_number.decor]})р')
-        # if not order_number.title == 'Не выбрано':
-        #     print('Надпись:')
-        #     print(f'{order_number.title} (+{price[order_number.title]})р')
-
     return all_orders
 
